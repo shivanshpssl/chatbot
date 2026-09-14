@@ -28,7 +28,8 @@ SECRET_KEY = 'django-insecure-hg9%9-1yn8h2q+oy8=yt_j$b*52wd=6+@sm*uud#xdl9(mjblu
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
+
 
 
 # Application definition
@@ -41,13 +42,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'chatbot',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -68,6 +71,10 @@ TEMPLATES = [
             ],
         },
     },
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:8000"
 ]
 
 WSGI_APPLICATION = 'AIchatbot.wsgi.application'
@@ -138,12 +145,12 @@ MAILERS = {
 
 MODEL_API_BASE_URL = config(
     "MODEL_API_BASE_URL",
-    default="http://192.168.1.76:1234/v1"
+    default="http://192.168.88.15:1234/v1"
 )
 
 MODEL_API_ENDPOINT = config(
     "MODEL_API_ENDPOINT",
-    default="http://192.168.1.76:1234/v1/chat/completions"
+    default="http://192.168.88.15:1234/v1/chat/completions"
 )
 
 MODEL_API_TIMEOUT = config(
