@@ -11,8 +11,6 @@ from .models import ChatConfig
 def home(request):
     return render(request, "index.html")
 
-
-@csrf_protect
 @require_http_methods(["POST"])
 def chat_view(request):
     try:
