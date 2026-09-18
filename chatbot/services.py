@@ -49,7 +49,7 @@ LANGUAGE_INSTRUCTIONS = {
 }
 
 
-def get_model_response(prompt, **kwargs):
+def get_model_response(prompt,server, **kwargs):
     config = settings.MODEL_API_CONFIG
     url = config["ENDPOINT_URL"]
 
@@ -71,7 +71,7 @@ def get_model_response(prompt, **kwargs):
         "model": config["MODEL_NAME"],
         "messages": [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": prompt}
+            {"role": "user", "server": server,"content": prompt}
         ],
         "temperature": 0.5,
     }

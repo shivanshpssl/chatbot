@@ -139,12 +139,12 @@ MAILERS = {
 
 MODEL_API_BASE_URL = config(
     "MODEL_API_BASE_URL",
-    default="http://192.168.88.4:1234/v1"
+    default="http://192.168.88.10:1234/v1"
 )
 
 MODEL_API_ENDPOINT = config(
     "MODEL_API_ENDPOINT",
-    default="http://192.168.88.4:1234/v1/chat/completions"
+    default="http://192.168.88.10:1234/v1/chat/completions"
 )
 
 MODEL_API_TIMEOUT = config(

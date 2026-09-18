@@ -45,6 +45,7 @@ def chat_view(request):
     user_id = data.get("user_id")
     user_email = data.get("user_email")
     user_role = data.get("user_role")
+    server = data.get("server")
 
     if not user_message:
         return JsonResponse({"success": False, "message": "Message khaali nahi ho sakta."}, status=400)
@@ -55,6 +56,7 @@ def chat_view(request):
         user_id=user_id,
         user_email=user_email,
         user_role=user_role,
+        server=server,
     )
 
     return JsonResponse({"success": True, **result})
