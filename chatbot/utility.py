@@ -2,9 +2,9 @@
 import requests
 from django.conf import settings
 
-def get_model_response(prompt, **kwargs):
+def get_model_response(prompt,server, **kwargs):
     url = f"{settings.MODEL_API_CONFIG['BASE_URL']}{settings.MODEL_API_CONFIG['ENDPOINT']}"
-    payload = {"prompt": prompt, **kwargs}
+    payload = {"prompt": prompt,"server": server, **kwargs}
     try:
         response = requests.post(
             url,

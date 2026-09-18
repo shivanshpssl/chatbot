@@ -49,13 +49,7 @@ LANGUAGE_INSTRUCTIONS = {
 }
 
 
-def get_model_response(prompt, user_id=None, user_email=None, user_role=None, server=None, **kwargs):
-    """
-    Calls the model API (Qwen) with the user's prompt.
-    user_id / user_email / user_role aate hain Laravel se (chatbot_view/chat_view se pass kiye jaate hain)
-    — abhi inhe sirf accept kar rahe hain taaki future me DB se attendance/personalized
-    data fetch karke prompt me inject kiya ja sake.
-    """
+def get_model_response(prompt,server, **kwargs):
     config = settings.MODEL_API_CONFIG
     url = config["ENDPOINT_URL"]
 
@@ -85,7 +79,7 @@ def get_model_response(prompt, user_id=None, user_email=None, user_role=None, se
         "messages": [
             
             {"role": "system", "content": system_prompt},
-            {"role": "user", "server":server, "content": prompt,"email": user_email},
+            {"role": "user", "server": server,"content": prompt}
         ],
         "temperature": 0.5,
     }

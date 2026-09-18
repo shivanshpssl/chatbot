@@ -56,7 +56,7 @@ def chat_view(request):
         user_id=user_id,
         user_email=user_email,
         user_role=user_role,
-        server=server
+        server=server,
     )
 
     return JsonResponse({"success": True, **result})
