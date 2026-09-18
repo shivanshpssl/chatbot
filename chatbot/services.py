@@ -49,7 +49,13 @@ LANGUAGE_INSTRUCTIONS = {
 }
 
 
-def get_model_response(prompt, **kwargs):
+def get_model_response(prompt, user_id=None, user_email=None, user_role=None, server=None, **kwargs):
+    """
+    Calls the model API (Qwen) with the user's prompt.
+    user_id / user_email / user_role aate hain Laravel se (chatbot_view/chat_view se pass kiye jaate hain)
+    — abhi inhe sirf accept kar rahe hain taaki future me DB se attendance/personalized
+    data fetch karke prompt me inject kiya ja sake.
+    """
     config = settings.MODEL_API_CONFIG
     url = config["ENDPOINT_URL"]
 
@@ -61,17 +67,25 @@ def get_model_response(prompt, **kwargs):
     lang_instruction = LANGUAGE_INSTRUCTIONS[lang]
 
     system_prompt = (
-        "You are a helpful chatbot named Prakhar. "
+        "You are a helpful chatbot named PAI, which stands for Prakhar AI. "
+        "Meaning of PAI, It means Prakhar AI "
         f"IMPORTANT LANGUAGE RULE: {lang_instruction} "
         "Never translate — always reply naturally in the same language the user used. "
         "Keep responses short, clear, and friendly."
     )
 
+    # ---- Future me yahan personalization add hoga ----
+    # Example:
+    # if user_role == "student" and user_id:
+    #     attendance = get_attendance_for_user(user_id)
+    #     system_prompt += f" Student's attendance record: {attendance}."
+
     payload = {
         "model": config["MODEL_NAME"],
         "messages": [
+            
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": prompt}
+            {"role": "user", "server":server, "content": prompt,"email": user_email},
         ],
         "temperature": 0.5,
     }
@@ -89,5 +103,5 @@ def get_model_response(prompt, **kwargs):
         logger.error("Model API error: %s", str(e))
         return {"reply": "Unable to connect to the model server."}
     except (KeyError, IndexError) as e:
-        logger.error("Unexpected response format: %s | data: %s", str(e), data)
+        logger.error("Unexpected response format: %s | data: %s", str(e), locals().get("data"))
         return {"reply": "Sorry, the model returned the response in an unexpected format."}

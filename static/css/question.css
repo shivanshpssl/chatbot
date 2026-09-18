@@ -1,0 +1,366 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------
+   Tokens — mapped to LMS (TailAdmin-style) palette
+--------------------------------------------------------- */
+:root {
+  --board: #F9FAFB;
+  --board-edge: #E5E7EB;
+  --chalk: #101828;
+  --chalk-dim: #667085;
+
+  --paper: #FFFFFF;
+  --paper-edge: #E5E7EB;
+  --ink: #101828;
+  --ink-dim: #667085;
+
+  --highlighter: #4F46E5;
+  --highlighter-dark: #4338CA;
+  --pen-red: #7C3AED;
+
+  --rule-line: rgba(16, 24, 40, 0.08);
+  --radius: 10px;
+
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--board);
+  color: var(--chalk);
+  font-family: var(--font-body);
+}
+
+body {
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(79,70,229,0.03), transparent 45%),
+    radial-gradient(ellipse at 85% 80%, rgba(124,58,237,0.03), transparent 40%);
+}
+
+/* ---------------------------------------------------------
+   Layout shell
+--------------------------------------------------------- */
+.board {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 56px 20px 80px;
+}
+
+.masthead {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.masthead__kicker {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--highlighter);
+  margin: 0 0 8px;
+}
+
+.masthead__title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  line-height: 1.15;
+  margin: 0 0 14px;
+  color: var(--chalk);
+}
+
+.masthead__sub {
+  color: var(--chalk-dim);
+  font-size: 0.98rem;
+  line-height: 1.6;
+  max-width: 46ch;
+  margin: 0 auto;
+}
+
+/* ---------------------------------------------------------
+   Worksheet card
+--------------------------------------------------------- */
+.worksheet {
+  position: relative;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--paper-edge);
+  border-radius: var(--radius);
+  padding: 32px 30px 28px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.6) inset,
+    0 16px 32px -18px rgba(16,24,40,0.18);
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 34px,
+      var(--rule-line) 35px
+    );
+}
+
+.worksheet::before {
+  content: "";
+  position: absolute;
+  left: 26px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(79, 70, 229, 0.18);
+}
+
+.form {
+  padding-left: 18px;
+}
+
+.field { margin-bottom: 22px; }
+
+.field-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.field-row .field { flex: 1 1 200px; }
+
+.field__label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.92rem;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+
+/* ---------------------------------------------------------
+   Dropzone
+--------------------------------------------------------- */
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  padding: 28px 16px;
+  border: 1.5px dashed var(--board-edge);
+  border-radius: var(--radius);
+  background: rgba(79, 70, 229, 0.03);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.dropzone:hover,
+.dropzone.is-dragover {
+  border-color: var(--highlighter);
+  background: rgba(79, 70, 229, 0.06);
+}
+
+.dropzone input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dropzone__icon { color: var(--ink-dim); }
+
+.dropzone__text {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.dropzone__hint {
+  font-size: 0.82rem;
+  color: var(--ink-dim);
+}
+
+/* ---------------------------------------------------------
+   Stepper
+--------------------------------------------------------- */
+.stepper {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1.5px solid var(--board-edge);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: rgba(79, 70, 229, 0.03);
+}
+
+.stepper__btn {
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font-size: 1.15rem;
+  width: 40px;
+  cursor: pointer;
+  transition: background 0.12s ease, transform 0.06s ease;
+}
+
+.stepper__btn:hover { background: rgba(79, 70, 229, 0.1); }
+.stepper__btn:active { transform: scale(0.92); }
+
+.stepper input[type="number"] {
+  width: 52px;
+  border: none;
+  border-left: 1.5px solid var(--board-edge);
+  border-right: 1.5px solid var(--board-edge);
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: transparent;
+  -moz-appearance: textfield;
+}
+.stepper input[type="number"]::-webkit-outer-spin-button,
+.stepper input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ---------------------------------------------------------
+   Submit button
+--------------------------------------------------------- */
+.stamp-btn {
+  margin-left: 18px;
+  margin-top: 6px;
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: #FFFFFF;
+  background: var(--highlighter);
+  border: 1.5px solid var(--highlighter-dark);
+  border-radius: var(--radius);
+  padding: 12px 26px;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+  box-shadow: 0 3px 0 var(--highlighter-dark);
+}
+
+.stamp-btn:hover { background: var(--highlighter-dark); transform: translateY(-1px); }
+
+.stamp-btn:active,
+.stamp-btn.is-stamping {
+  transform: translateY(2px) scale(0.98);
+  box-shadow: 0 1px 0 var(--highlighter-dark);
+}
+
+/* ---------------------------------------------------------
+   Loading overlay
+--------------------------------------------------------- */
+.loading-overlay {
+  display: none;
+  align-items: center;
+  gap: 14px;
+  margin-top: 18px;
+  padding-left: 18px;
+  color: var(--ink-dim);
+  font-size: 0.92rem;
+}
+
+.loading-overlay.is-visible { display: flex; }
+
+.chalk-spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(79,70,229,0.18);
+  border-top-color: var(--highlighter);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------------------------------------------------------
+   Notices
+--------------------------------------------------------- */
+.notice {
+  margin-top: 22px;
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.notice--error {
+  background: rgba(220, 38, 38, 0.06);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  color: #B42318;
+}
+
+/* ---------------------------------------------------------
+   Results
+--------------------------------------------------------- */
+.results {
+  margin-top: 30px;
+  position: relative;
+  opacity: 0;
+}
+
+.results__torn {
+  height: 14px;
+  background:
+    linear-gradient(135deg, transparent 50%, var(--paper) 50%) 0 0/16px 16px repeat-x,
+    linear-gradient(-135deg, transparent 50%, var(--paper) 50%) 0 0/16px 16px repeat-x;
+  background-position: 0 0, 8px 0;
+}
+
+.results__body {
+  background: var(--paper);
+  color: var(--ink);
+  padding: 30px 30px 34px;
+  border-radius: 0 0 var(--radius) var(--radius);
+  line-height: 1.65;
+}
+
+.results__body h2 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  margin: 0 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1.5px solid var(--rule-line);
+  opacity: 0;
+}
+
+.results__body h2:first-child { margin-top: 0; }
+.results__body h3 { font-family: var(--font-display); font-size: 1.08rem; margin: 20px 0 6px; }
+.results__body p { margin: 0 0 10px; }
+.results__body ul { margin: 0 0 16px; padding-left: 22px; }
+.results__body li { margin-bottom: 6px; }
+.results__body strong { color: var(--highlighter); }
+
+.results__body .qa-block {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+/* Reveal animation classes toggled by JS */
+.results.is-revealed { animation: fadeIn 0.4s ease forwards; }
+.results.is-revealed .results__body h2 { animation: fadeIn 0.5s ease forwards; }
+.results.is-revealed .results__body .qa-block { animation: riseIn 0.45s ease forwards; }
+
+@keyframes fadeIn { to { opacity: 1; } }
+@keyframes riseIn { to { opacity: 1; transform: translateY(0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .results, .results__body h2, .results__body .qa-block { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .chalk-spinner { animation: none; }
+}
+
+/* ---------------------------------------------------------
+   Responsive
+--------------------------------------------------------- */
+@media (max-width: 520px) {
+  .board { padding: 36px 14px 60px; }
+  .worksheet { padding: 26px 18px 22px; }
+  .form { padding-left: 8px; }
+  .stamp-btn { margin-left: 8px; width: calc(100% - 8px); text-align: center; }
+  .field-row { gap: 16px; }
+}

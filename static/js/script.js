@@ -1,5 +1,10 @@
 const CHAT_API_URL = "/api/chat/"; // <-- put your Django endpoint here
 
+// ⚠️ Sirf LOCAL TESTING ke liye. Production LMS widget me yeh token yahan
+// hardcode NAHI karna — real flow me Laravel backend hi Django ko token
+// ke saath call karega, browser JS kabhi nahi.
+const CHATBOT_API_TOKEN = "qwen2.5-coder-14b-instruct-token";
+
 const launcher   = document.getElementById('cbLauncher');
 const windowEl   = document.getElementById('cbWindow');
 const closeBtn   = document.getElementById('cbClose');
@@ -101,7 +106,8 @@ async function sendToBackend(message) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRFToken': getCookie('csrftoken')
+        'X-CSRFToken': getCookie('csrftoken'),
+        'Authorization': `Bearer ${CHATBOT_API_TOKEN}`   // <-- YEH LINE ADD KI
       },
       body: JSON.stringify({ message })
     });

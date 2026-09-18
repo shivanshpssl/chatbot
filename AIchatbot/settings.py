@@ -12,24 +12,18 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import os
 
-#import environ
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-hg9%9-1yn8h2q+oy8=yt_j$b*52wd=6+@sm*uud#xdl9(mjblu'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+# YEH LINE FIX KI:
+CHATBOT_API_TOKEN = config("CHATBOT_API_TOKEN", default=None)
 
 
 # Application definition
@@ -42,11 +36,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'chatbot',
-    'corsheaders',
+    "corsheaders",
+    'QuestionAnswer',
 ]
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -145,12 +140,12 @@ MAILERS = {
 
 MODEL_API_BASE_URL = config(
     "MODEL_API_BASE_URL",
-    default="http://192.168.88.15:1234/v1"
+    default="http://192.168.88.10:1234/v1"
 )
 
 MODEL_API_ENDPOINT = config(
     "MODEL_API_ENDPOINT",
-    default="http://192.168.88.15:1234/v1/chat/completions"
+    default="http://192.168.88.10:1234/v1/chat/completions"
 )
 
 MODEL_API_TIMEOUT = config(
@@ -179,9 +174,27 @@ MODEL_NAME = config(
 #environ.Env.read_env()
 
 MODEL_API_CONFIG = {
-    "BASE_URL": config("MODEL_API_BASE_URL", default="http://192.168.1.76:1234/v1"),
-    "ENDPOINT_URL": config("MODEL_API_ENDPOINT", default="http://192.168.1.76:1234/v1/chat/completions"),
+    "BASE_URL": config("MODEL_API_BASE_URL", default="http://192.168.88.10:1234/v1"),
+    "ENDPOINT_URL": config("MODEL_API_ENDPOINT", default="http://192.168.88.10:1234/v1/chat/completions"),
     "TIMEOUT": config("MODEL_API_TIMEOUT", default=30, cast=int),
     "API_KEY": config("MODEL_API_KEY", default="lm-studio"),
     "MODEL_NAME": config("MODEL_NAME", default="qwen2.5-coder-14b-instruct"),
+}
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'null': {
+            'class': 'logging.NullHandler',
+        },
+    },
+    'loggers': {
+        'django.server': {
+            'handlers': ['null'],
+            'level': 'CRITICAL',  # Suppresses INFO and WARNING logs (like broken pipes)
+            'propagate': False,
+        },
+    },
 }

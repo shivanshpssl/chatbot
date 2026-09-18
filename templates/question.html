@@ -1,0 +1,222 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campus LMS | AI Question Generator</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/question.css' %}">
+
+  <style>
+    /* Fallback / guaranteed styles for the loading overlay + spinner.
+       Safe to keep here even if question.css also styles these classes —
+       these are just the minimum needed for the animation to work. */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      background: rgba(20, 16, 12, 0.55);
+      backdrop-filter: blur(2px);
+    }
+
+    .loading-overlay.is-active {
+      display: flex;
+    }
+
+    .loading-overlay p {
+      color: #fff;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 1rem;
+      margin: 0;
+      text-align: center;
+      padding: 0 16px;
+    }
+
+    .chalk-spinner {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 5px solid rgba(255, 255, 255, 0.25);
+      border-top-color: #fff;
+      animation: chalk-spin 0.9s linear infinite;
+    }
+
+    @keyframes chalk-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .stamp-btn[disabled] {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="board">
+    <header class="masthead">
+      <p class="masthead__kicker">Campus LMS &middot; Study Tools</p>
+      <h1 class="masthead__title">Turn your course material into a question set</h1>
+      <p class="masthead__sub">Upload your notes, slides, or chapter as a PDF or Word document. Choose how many of each kind you need. Get multiple-choice and short-answer questions back, ready to study from.</p>
+    </header>
+
+    <main class="worksheet">
+      <form class="form" method="post" enctype="multipart/form-data" id="qgen-form">
+        {% csrf_token %}
+
+        <div class="field">
+          <label class="field__label" for="course_file">Source material (PDF or DOC/DOCX)</label>
+          <label class="dropzone" id="dropzone" for="course_file">
+            <input
+              type="file"
+              id="course_file"
+              name="course_file"
+              accept=".pdf,application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              required
+            >
+            <span class="dropzone__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6">
+                <path d="M12 3v12" stroke-linecap="round"/>
+                <path d="M7 8l5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="dropzone__text" id="dropzone-text">Drop a PDF or DOC/DOCX here, or click to browse</span>
+            <span class="dropzone__hint" id="dropzone-hint">One file &middot; PDF or Word (.doc/.docx) &middot; up to ~30 pages works best</span>
+          </label>
+          <p class="field__error" id="file-type-error" hidden>Please choose a PDF or Word (.doc/.docx) file.</p>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label class="field__label" for="num_mcqs">Multiple-choice questions</label>
+            <div class="stepper" data-stepper>
+              <button type="button" class="stepper__btn" data-step="-1" aria-label="Fewer MCQs">&minus;</button>
+              <input type="number" id="num_mcqs" name="num_mcqs" min="1" max="15" value="5" inputmode="numeric">
+              <button type="button" class="stepper__btn" data-step="1" aria-label="More MCQs">&plus;</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="num_questions">Short/long answer questions</label>
+            <div class="stepper" data-stepper>
+              <button type="button" class="stepper__btn" data-step="-1" aria-label="Fewer questions">&minus;</button>
+              <input type="number" id="num_questions" name="num_questions" min="1" max="15" value="5" inputmode="numeric">
+              <button type="button" class="stepper__btn" data-step="1" aria-label="More questions">&plus;</button>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="stamp-btn" id="submit-btn">
+          <span class="stamp-btn__label">Generate questions</span>
+        </button>
+      </form>
+
+      <div class="loading-overlay" id="loading-overlay" aria-hidden="true">
+        <div class="chalk-spinner" aria-hidden="true"></div>
+        <p id="loading-text">Reading your file and writing questions&hellip;</p>
+      </div>
+    </main>
+
+    {% if error_message %}
+      <div class="notice notice--error" role="alert">
+        <strong>Something went wrong.</strong> {{ error_message }}
+      </div>
+    {% endif %}
+
+    {% if result_text %}
+      <section class="results" id="results" data-has-results>
+        <div class="results__torn" aria-hidden="true"></div>
+        <div class="results__body" id="results-body" data-raw="{{ result_text }}"></div>
+      </section>
+    {% endif %}
+  </div>
+
+  <script>
+    (function () {
+      const input = document.getElementById('course_file');
+      const errorEl = document.getElementById('file-type-error');
+      const hintEl = document.getElementById('dropzone-hint');
+      const textEl = document.getElementById('dropzone-text');
+      const allowedExt = ['.pdf', '.doc', '.docx'];
+
+      // --- File-type guard: only allow PDF / DOC / DOCX before submit ---
+      if (input) {
+        input.addEventListener('change', function () {
+          const file = input.files && input.files[0];
+          if (!file) return;
+
+          const name = file.name.toLowerCase();
+          const isAllowed = allowedExt.some(function (ext) {
+            return name.endsWith(ext);
+          });
+
+          if (!isAllowed) {
+            errorEl.hidden = false;
+            input.value = '';
+            textEl.textContent = 'Drop a PDF or DOC/DOCX here, or click to browse';
+            hintEl.textContent = 'One file · PDF or Word (.doc/.docx) · up to ~30 pages works best';
+            return;
+          }
+
+          errorEl.hidden = true;
+          textEl.textContent = file.name;
+          hintEl.textContent = 'Ready to upload';
+        });
+      }
+
+      // --- Loading animation: shown from submit until the page reloads with the result ---
+      const form = document.getElementById('qgen-form');
+      const overlay = document.getElementById('loading-overlay');
+      const loadingText = document.getElementById('loading-text');
+      const submitBtn = document.getElementById('submit-btn');
+
+      const loadingMessages = [
+        'Reading your file and writing questions\u2026',
+        'Still working \u2014 longer files take a little more time\u2026',
+        'Almost there, generating your question set\u2026'
+      ];
+
+      if (form && overlay) {
+        form.addEventListener('submit', function (e) {
+          // Don't block submission if the file type is invalid — let HTML5
+          // "required" + our own check above stop that before this fires.
+          const file = input && input.files && input.files[0];
+          if (!file) return;
+
+          overlay.classList.add('is-active');
+          overlay.setAttribute('aria-hidden', 'false');
+
+          if (submitBtn) {
+            submitBtn.setAttribute('disabled', 'disabled');
+          }
+
+          // Cycle through reassuring messages so long uploads don't feel stuck.
+          let msgIndex = 0;
+          setInterval(function () {
+            msgIndex = (msgIndex + 1) % loadingMessages.length;
+            if (loadingText) {
+              loadingText.textContent = loadingMessages[msgIndex];
+            }
+          }, 4000);
+
+          // Form still submits normally (full page POST) — the overlay stays
+          // up until the browser navigates to the response page.
+        });
+      }
+    })();
+  </script>
+
+  <script src="{% static 'js/question.js' %}"></script>
+</body>
+</html>
